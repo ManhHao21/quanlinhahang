@@ -81,78 +81,40 @@ class Cart extends Component
             }
         }
     }
+    public function printInvoice()
+    {
+        $order = Order::with('orderItems.menu')->find($this->orderId);
+
+        if (!$order) {
+            $this->dispatch('notify', type: 'error', message: 'Không tìm thấy đơn hàng');
+            return;
+        }
+
+        $text = "BILL\n";
+        $text .= "----------------------\n";
+        foreach ($order->orderItems as $item) {
+            $text .= $item->menu->name . " x" . $item->quantity . "\n";
+        }
+        $text .= "Tổng: " . $order->total . "đ\n\n";
+
+        $this->sendPrintToNetworkPrinter($text);
+    }
+
     public function sendPrintToNetworkPrinter(string $text)
     {
-        $printerIp = '192.168.1.100';  // Thay IP máy in của bạn
-        $printerPort = 9100;           // Port in thường là 9100
+        $printerIp = '192.168.1.100';
+        $printerPort = 9100;
 
         $fp = @fsockopen($printerIp, $printerPort, $errno, $errstr, 5);
         if (!$fp) {
-            session()->flash('error', "Không kết nối được máy in: $errstr ($errno)");
-            return false;
+            $this->dispatch('notify', type: 'error', message: "Không kết nối được máy in");
+            return;
         }
 
         fwrite($fp, $text);
         fclose($fp);
 
-        session()->flash('message', 'Đã gửi lệnh in tới máy in.');
-        return true;
-    }
-
-    public function printInvoice()
-    {
-        $order = Order::with([
-            'orderItems.menu' => function ($query) {
-                $query->select('id', 'name', 'price', 'description');
-            }
-        ])->find($this->orderId);
-
-        if (!$order) {
-            return response()->json(['error' => 'Order not found'], 404);
-        }
-
-        // Xử lý encoding đặc biệt cho tiếng Việt
-        $orderArray = $this->fixVietnameseEncoding($order->toArray());
-
-        try {
-            $html = view('print.invoice_pdf', [
-                'order' => $orderArray,
-                'encoding' => 'UTF-8'
-            ])->render();
-
-            $pdf = PDF::loadHTML($html)
-                ->setPaper([0, 0, 164, 500], 'portrait')
-                ->setOptions([
-                    'defaultFont' => 'DejaVu Sans',
-                    'isRemoteEnabled' => true,
-                    'isHtml5ParserEnabled' => true
-                ]);
-
-            return $pdf->stream('invoice.pdf');
-
-        } catch (\Exception $e) {
-            \Log::error('PDF Error', [
-                'message' => $e->getMessage(),
-                'order' => $orderArray,
-                'trace' => $e->getTraceAsString()
-            ]);
-            return response()->json(['error' => 'PDF generation failed'], 500);
-        }
-    }
-
-    protected function fixVietnameseEncoding($data)
-    {
-        $data = json_decode(json_encode($data), true);
-        array_walk_recursive($data, function (&$value) {
-            if (is_string($value)) {
-                if (preg_match('/[ÃÂÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõùúýÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝ]/u', $value)) {
-                    $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
-                }
-                $value = iconv('UTF-8', 'UTF-8//IGNORE', $value);
-                $value = preg_replace('/[^\x09\x0A\x0D\x20-\x7E\xC2-\xF4][\x80-\xBF]*/', '', $value);
-            }
-        });
-        return $data;
+        $this->dispatch('notify', type: 'success', message: 'Đã in bill');
     }
 
 

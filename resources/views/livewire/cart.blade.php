@@ -74,17 +74,13 @@
     @endif
 
 </div>
-
 <script>
     document.addEventListener('livewire:init', () => {
-        Livewire.on('print-invoice', ({
-            text
+        Livewire.on('notify', ({
+            type,
+            message
         }) => {
-            let printWindow = window.open('', '', 'width=300,height=600');
-            printWindow.document.write('<pre style="font-size:14px; font-family:monospace;">' + text +
-                '</pre>');
-            printWindow.document.close();
-            printWindow.print();
+            alert(type.toUpperCase() + ': ' + message);
         });
     });
 </script>
