@@ -89,20 +89,17 @@ class Cart extends Component
             $this->dispatch('notify', type: 'error', message: 'Không tìm thấy đơn hàng');
             return;
         }
-
-        $text = "BILL\n";
-        $text .= "----------------------\n";
-        foreach ($order->orderItems as $item) {
-            $text .= $item->menu->name . " x" . $item->quantity . "\n";
-        }
-        $text .= "Tổng: " . $order->total . "đ\n\n";
-
-        $this->sendPrintToNetworkPrinter($text);
+        // dd($order);
+        $pdf = Pdf::loadView('print.invoice_pdf', compact('order'));
+        $pdf->setOption('defaultFont', 'DejaVu Sans');
+        $pdf->setOption('isRemoteEnabled', true);
+        $pdf->setPaper([0, 0, 226.77, 800], 'portrait'); // Kích thước phù hợp hóa đơn
+        $this->sendPrintToNetworkPrinter($pdf->output());
     }
 
     public function sendPrintToNetworkPrinter(string $text)
     {
-        $printerIp = '192.168.1.100';
+        $printerIp = '192.168.1.235';
         $printerPort = 9100;
 
         $fp = @fsockopen($printerIp, $printerPort, $errno, $errstr, 5);
