@@ -7,10 +7,9 @@
 
         {{-- 3 nút bên phải --}}
         <div class="d-flex gap-2">
-            <button class="btn btn-primary">Thêm món</button>
+            <a href="/create/product" class="btn btn-primary">Thêm món</a>
             <button class="btn btn-primary">Lịch sử</button>
             <button class="btn btn-primary">Cấu hình</button>
         </div>
     </div>
 </div>
-a
