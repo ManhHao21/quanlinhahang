@@ -91,7 +91,7 @@ class Cart extends Component
         }
         // dd($order);
         $pdf = Pdf::loadView('print.invoice_pdf', compact('order'));
-        $pdf->setOption('defaultFont', 'DejaVu Sans');
+        $imageBuffer -> setFont("/font/NotoSans-Regular.ttf");
         $pdf->setOption('isRemoteEnabled', true);
         $pdf->setPaper([0, 0, 226.77, 800], 'portrait'); // Kích thước phù hợp hóa đơn
         $this->sendPrintToNetworkPrinter($pdf->output());
