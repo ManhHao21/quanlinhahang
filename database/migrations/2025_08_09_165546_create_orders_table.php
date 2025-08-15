@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->dateTime('date_ordered'); // Ngày đặt hàng
             $table->dateTime('start_time')->nullable(); // Thời gian bắt đầu
             $table->dateTime('end_time')->nullable();
-            $table->string('status')->default('pending'); // Trạng thái: pending, paid, canceled
+            $table->string('status')->default('pending'); // Trạng thái: pending, success, canceled
             $table->timestamps();
         });
     }

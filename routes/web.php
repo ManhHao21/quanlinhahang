@@ -18,6 +18,17 @@ Route::get('/', function () {
 });
 
 
-Route::get('/create/product', function () {
-    return view('product');
+Route::prefix('menus')->group(function () {
+    Route::get('/create', function () {
+        return view('product');
+    })->name('create');
+    Route::post('/store', [\App\Livewire\CreateProduct::class, 'store'])->name('store');
+    Route::get('/{menu}/edit', [\App\Livewire\CreateProduct::class, 'edit'])->name('edit');
+    Route::put('/{menu}', [\App\Livewire\CreateProduct::class, 'update'])->name('update');
+    Route::delete('/{menu}', [\App\Livewire\CreateProduct::class, 'destroy'])->name('destroy');
 });
+
+
+Route::get('/order-history', function () {
+    return view('order-history');
+})->name('order.history');

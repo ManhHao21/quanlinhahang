@@ -7,7 +7,7 @@
             @if (session('success'))
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
-
+            <input type="text" class="form-control mb-3" placeholder="Tìm món..." wire:model.live="search">
             <table class="table table-bordered table-striped align-middle">
                 <thead class="table-dark">
                     <tr>
@@ -33,13 +33,14 @@
                             <td>{{ number_format($menu->price, 0, ',', '.') }} đ</td>
                             <td>{{ $menu->description }}</td>
                             <td>
-                                <a href="{{ route('menus.edit', $menu->id) }}" class="btn btn-sm btn-primary">Sửa</a>
-                                <form action="{{ route('menus.destroy', $menu->id) }}" method="POST" class="d-inline"
-                                    onsubmit="return confirm('Xóa món này?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-danger" type="submit">Xóa</button>
-                                </form>
+                                <button type="button" wire:click="edit({{ $menu->id }})"
+                                    class="btn btn-sm btn-primary">
+                                    Sửa
+                                </button>
+                                <button wire:click="destroy({{ $menu->id }})"
+                                    onclick="return confirm('Xóa món này?')" class="btn btn-sm btn-danger">
+                                    Xóa
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -49,11 +50,16 @@
                     @endforelse
                 </tbody>
             </table>
+            {{ $menus->links() }}
         </div>
 
         {{-- Cột bên phải: Form thêm món ăn --}}
         <div class="col-md-5">
-            <h2 class="mb-4">Thêm món ăn mới</h2>
+            @if (session()->has('message'))
+                <div class="alert alert-success">
+                    {{ session('message') }}
+                </div>
+            @endif
 
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -64,34 +70,58 @@
                     </ul>
                 </div>
             @endif
-
-            <form action="{{ route('menus.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-
+            <h2 class="mb-4">{{ $menuId ? 'Cập nhật món ăn' : 'Thêm món ăn mới' }}</h2>
+            <form wire:submit.prevent="save" enctype="multipart/form-data">
                 <div class="mb-3">
-                    <label for="name" class="form-label">Tên món ăn</label>
-                    <input type="text" name="name" class="form-control" id="name"
-                        value="{{ old('name') }}" required>
+                    <label for="name" class="form-label">Tên món</label>
+                    <input type="text" id="name" class="form-control" wire:model="name">
+                    @error('name')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
                     <label for="price" class="form-label">Giá</label>
-                    <input type="number" step="0.01" name="price" class="form-control" id="price"
-                        value="{{ old('price') }}" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="image" class="form-label">Hình ảnh</label>
-                    <input type="file" name="image" class="form-control" id="image" accept="image/*">
+                    <input type="number" id="price" class="form-control" wire:model="price">
+                    @error('price')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <div class="mb-3">
                     <label for="description" class="form-label">Mô tả</label>
-                    <textarea name="description" class="form-control" id="description" rows="3">{{ old('description') }}</textarea>
+                    <textarea id="description" class="form-control" wire:model="description"></textarea>
+                    @error('description')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <button type="submit" class="btn btn-success">Lưu</button>
-                <a href="{{ route('menus.index') }}" class="btn btn-secondary">Hủy</a>
+                <div class="mb-3">
+                    <label for="image" class="form-label">Ảnh</label>
+                    <input type="file" id="image" class="form-control" wire:model="image">
+                    @error('image')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Preview ảnh khi edit --}}
+                @if ($image)
+                    <div class="mt-2">
+                        <img src="{{ $image->temporaryUrl() }}" class="img-thumbnail" style="max-height: 200px;">
+                    </div>
+                @elseif($imagePath)
+                    <div class="mt-2">
+                        <img src="{{ asset('storage/' . $imagePath) }}" class="img-thumbnail"
+                            style="max-height: 200px;">
+                    </div>
+                @endif
+
+                <button type="submit" class="btn btn-success">
+                    {{ $menuId ? 'Cập nhật' : 'Lưu' }}
+                </button>
+                @if ($menuId)
+                    <button type="button" wire:click="resetForm" class="btn btn-secondary">Hủy</button>
+                @endif
             </form>
         </div>
     </div>

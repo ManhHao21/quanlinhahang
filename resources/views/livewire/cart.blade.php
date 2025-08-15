@@ -59,15 +59,16 @@
             <span class="text-primary">{{ number_format($total, 0, ',', '.') }}đ</span>
         </div>
         <div class="d-flex" style="gap: 10px;">
-            <button class="btn btn-success w-100 mt-3 py-2 fs-8" wire:click="printInvoice">
-                <i class="fas fa-print me-2"></i> In hóa đơn 1
-            </button>
-            <button class="btn btn-success w-100 mt-3 py-2 fs-8" wire:click="printInvoice">
-                <i class="fas fa-print me-2"></i> In hóa đơn 2
-            </button>
-            <button class="btn btn-success w-100 mt-3 py-2 fs-8" wire:click="printInvoice">
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice">
                 <i class="fas fa-print me-2"></i> Lưu tạm thời
             </button>
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice">
+                <i class="fas fa-print me-2"></i> Đã thanh toán
+            </button>
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice">
+                <i class="fas fa-print me-2"></i> In hóa đơn
+            </button>
+
         </div>
     @else
         <div class="alert alert-info">Không có sản phẩm nào trong đơn hàng</div>
