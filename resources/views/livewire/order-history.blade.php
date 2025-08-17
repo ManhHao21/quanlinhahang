@@ -14,6 +14,8 @@
             <button wire:click="applyFilters" class="btn btn-primary shadow-sm">
                 Lọc
             </button>
+            <a href="{{ route('order.history') }}" class="btn btn-primary shadow-sm">
+                Clear </a>
         </div>
     </div>
 

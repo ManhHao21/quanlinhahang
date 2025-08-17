@@ -32,3 +32,7 @@ Route::prefix('menus')->group(function () {
 Route::get('/order-history', function () {
     return view('order-history');
 })->name('order.history');
+
+Route::get('/orders/{id}', function($id) {
+    return view('show', compact('id'));
+})->name('orders.show');

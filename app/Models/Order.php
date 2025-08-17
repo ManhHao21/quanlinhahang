@@ -11,7 +11,7 @@ class Order extends Model
 
     const STATUS_PENDING = 'pending';
     const STATUS_SUCCESS = 'success';
-    const STATUS_CANCELED = 'canceled';
+    const STATUS_TEMPOLARY = 'tempolary';
     protected $fillable = [
         'bill_code',
         'table_number',

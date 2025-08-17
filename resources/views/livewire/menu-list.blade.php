@@ -4,16 +4,21 @@
 
     {{-- Danh sách món --}}
     <div class="row g-3 overflow-auto" style="height: calc(100vh - 120px);">
+        @php
+        @endphp
         @foreach ($menuItems as $item)
             @php
                 $isChecked = in_array($item->id, $selectedItems ?? []);
             @endphp
-            <div class="col-md-6">
+            <div class="col-md-4" style="height: 350px">
                 <div class="card h-100 selectable-card {{ $isChecked ? 'selected' : '' }}" style="cursor: pointer;"
                     wire:click="toggleItem({{ $item->id }})">
 
-                    <img src="{{ asset('images/' . $item->image) }}"
-                        class="card-img-top {{ $item->image ? '' : 'd-none' }}" alt="{{ $item->name }}">
+                    <div style="height: 150px; overflow: hidden;">
+                        <img src="{{ asset('storage/' . $item->image) }}"
+                            class="card-img-top {{ $item->image ? '' : 'd-none' }}" alt="{{ $item->name }}"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
 
                     <div class="card-body">
                         <h5 class="card-title">{{ $item->name }}</h5>

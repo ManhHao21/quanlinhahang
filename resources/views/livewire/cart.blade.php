@@ -4,18 +4,32 @@
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">Thông tin đơn hàng</h5>
         </div>
+        <div>
+            @if (session()->has('notify'))
+                <div class="alert alert-{{ session('notify.type') }} alert-dismissible fade show" role="alert">
+                    {{ session('notify.message') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        </div>
+
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">Số bàn</label>
-                    <input type="text" class="form-control" wire:model="tableNumber"
-                        wire:change.debounce="saveOrderInfo">
+                    <input type="text" class="form-control" wire:model="tableNumber">
+                    @error('tableNumber')
+                        <div class="text-danger small">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Tên bàn</label>
-                    <input type="text" class="form-control" wire:model="tableName"
-                        wire:change.debounce="saveOrderInfo">
+                    <input type="text" class="form-control" wire:model="tableName">
+                    @error('tableName')
+                        <div class="text-danger small">{{ $message }}</div>
+                    @enderror
                 </div>
+
             </div>
         </div>
     </div>
@@ -59,13 +73,17 @@
             <span class="text-primary">{{ number_format($total, 0, ',', '.') }}đ</span>
         </div>
         <div class="d-flex" style="gap: 10px;">
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice">
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="tempOrder({{ $orders->id }})"
+                {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Lưu tạm thời
             </button>
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice">
+
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice"
+                {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Đã thanh toán
             </button>
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice">
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice"
+                {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> In hóa đơn
             </button>
 
@@ -77,11 +95,14 @@
 </div>
 <script>
     document.addEventListener('livewire:init', () => {
-        Livewire.on('notify', ({
-            type,
-            message
-        }) => {
+        Livewire.on('notify', ({ type, message }) => {
+            // vẫn hiện toast/alert như trước
             alert(type.toUpperCase() + ': ' + message);
+        });
+
+        Livewire.on('reloadPage', () => {
+            location.reload(); // reload toàn trang
         });
     });
 </script>
+ 

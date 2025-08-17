@@ -43,6 +43,12 @@ class OrderHistory extends Component
             ->sum('total');
     }
 
+public function viewOrderDetails($id)
+{
+    return redirect()->route('orders.show', $id);
+}
+
+
     public function render()
     {
         $orders = Order::with('orderItems.menu')
@@ -61,5 +67,9 @@ class OrderHistory extends Component
         return view('livewire.order-history', [
             'orders' => $orders,
         ]);
+    }
+
+    public function clearFilters() {
+
     }
 }

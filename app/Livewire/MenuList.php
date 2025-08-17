@@ -14,6 +14,8 @@ class MenuList extends Component
 {
     public $search = '';
     public $menuItems;
+
+    public $orderId;
     public $selectedItems = [];
     public $currentOrderId = null;
     protected $listeners = [
@@ -23,8 +25,9 @@ class MenuList extends Component
     {
         $this->selectedItems = $selectedItems;
     }
-    public function mount()
+    public function mount($orderId)
     {
+        $this->orderId = $orderId;
         $this->menuItems = Menu::all();
     }
 
@@ -118,7 +121,7 @@ class MenuList extends Component
         });
     }
 
-    public function render()
+    public function render($orderId = null)
     {
         $menuItems = Menu::query()
             ->when($this->search, function ($query) {

@@ -7,7 +7,7 @@
 
         {{-- 3 nút bên phải --}}
         <div class="d-flex gap-2">
-            <a href="/create/product" class="btn btn-primary">Thêm món</a>
+            <a href="{{ route('create') }}" class="btn btn-primary">Thêm món</a>
             <a href="/order-history" class="btn btn-primary">Lịch sử</a>
             <a class="btn btn-primary">Cấu hình</a>
         </div>
