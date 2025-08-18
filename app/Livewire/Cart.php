@@ -172,8 +172,15 @@ class Cart extends Component
             $conn->write($this->removeAccents("MBBank") . "\n");
             $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
             $conn->write("0975410133\n\n");
-            $qrPath = public_path('images/qrcode.png'); // Đường dẫn file ảnh
-            $qrImg = EscposImage::load($qrPath, false); // false = giữ nguyên
+            $qrPath = public_path('images/qrcode.png');
+            if (file_exists($qrPath)) {
+                $qrImg = EscposImage::load($qrPath, false);
+                $printer->graphics($qrImg); // hoặc $printer->bitImage($qrImg);
+            } else {
+                $conn->write("QR khong ton tai\n");
+            }
+            $printer->graphics($qrImg);
+
 
             $conn->write($this->removeAccents("Cam on quy khach") . "\n");
             $conn->write("Powered by iPOS.vn\n");
