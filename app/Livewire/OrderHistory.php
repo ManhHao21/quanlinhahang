@@ -111,7 +111,6 @@ class OrderHistory extends Component
                 '',
                 'SL',
                 'Don gia',
-                '',
                 'Thanh tien'
             ]));
             $conn->write(str_repeat('-', 42) . "\n");
