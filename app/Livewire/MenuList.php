@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\DB;
 class MenuList extends Component
 {
     public $search = '';
-    public $menuItems;
-
     public $orderId;
     public $selectedItems = [];
     public $currentOrderId = null;
@@ -28,7 +26,7 @@ class MenuList extends Component
     public function mount($orderId = null): void
     {
         $this->orderId = $orderId;
-        $this->menuItems = Menu::all();
+        // $this->menuItems = Menu::all();
     }
 
     public function toggleItem($id)
@@ -41,7 +39,7 @@ class MenuList extends Component
         }
         Log::info('Selected Items: ', ['selectedItems' => $this->selectedItems]);
         // Make sure selected IDs are unique and re-indexed
-          $this->dispatch('select-item', selectedItems: $this->selectedItems);
+        $this->dispatch('select-item', selectedItems: $this->selectedItems);
 
 
         // 2. Handle order deletion if no items are selected
@@ -114,18 +112,20 @@ class MenuList extends Component
 
     public function render($orderId = null)
     {
+
         $menuItems = Menu::query()
             ->when($this->search, function ($query) {
                 $query->where('name', 'like', '%' . $this->search . '%');
             })
             ->orderBy('name')
             ->get();
-            if($this->orderId) {
-                $this->currentOrderId = $this->orderId;
-                $this->selectedItems = OrderItem::where('order_id', $this->currentOrderId)
-                    ->pluck('menu_id')
-                    ->toArray();
-            }
+
+        if ($this->orderId) {
+            $this->currentOrderId = $this->orderId;
+            $this->selectedItems = OrderItem::where('order_id', $this->currentOrderId)
+                ->pluck('menu_id')
+                ->toArray();
+        }
         return view('livewire.menu-list', compact('menuItems'));
     }
 }
