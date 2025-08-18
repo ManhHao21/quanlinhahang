@@ -130,20 +130,58 @@ class Cart extends Component
 
 
             // Format hàng bảng (cố định cột)
+            // $formatTableRow = function (array $cols): string {
+            //     $widths = [4, 15, 6, 10, 12]; // STT | Tên món | SL | Đơn giá | Thành tiền
+            //     $row = '';
+            //     foreach ($cols as $i => $text) {
+            //         $text = mb_substr($text, 0, $widths[$i], 'UTF-8');
+            //         if ($i == 0) { // STT
+            //             $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
+            //         } elseif ($i == 1) { // Tên món
+            //             $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
+            //         } else { // số liệu thì canh phải
+            //             $row .= str_pad($text, $widths[$i], ' ', STR_PAD_LEFT);
+            //         }
+            //     }
+            //     return $row . "\n";
+            // };
+
             $formatTableRow = function (array $cols): string {
                 $widths = [4, 15, 6, 10, 12]; // STT | Tên món | SL | Đơn giá | Thành tiền
-                $row = '';
+
+                // Xử lý tách dòng cho các nội dung dài
+                $wrappedCols = [];
                 foreach ($cols as $i => $text) {
-                    $text = mb_substr($text, 0, $widths[$i], 'UTF-8');
-                    if ($i == 0) { // STT
-                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
-                    } elseif ($i == 1) { // Tên món
-                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
-                    } else { // số liệu thì canh phải
-                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_LEFT);
+                    if ($i == 1) { // Chỉ xử lý xuống dòng cho cột tên món
+                        $wrapped = wordwrap($text, $widths[$i], "\n", true);
+                        $wrappedCols[$i] = explode("\n", $wrapped);
+                    } else {
+                        $wrappedCols[$i] = [$text];
                     }
                 }
-                return $row . "\n";
+
+                // Tìm số dòng tối đa cần in cho hàng này
+                $maxLines = max(array_map('count', $wrappedCols));
+
+                $row = '';
+                for ($line = 0; $line < $maxLines; $line++) {
+                    foreach ($cols as $i => $text) {
+                        $lineText = $wrappedCols[$i][$line] ?? '';
+
+                        if ($i == 0) { // STT
+                            // Chỉ hiển thị STT ở dòng đầu tiên
+                            $row .= str_pad($line === 0 ? $lineText : '', $widths[$i], ' ', STR_PAD_RIGHT);
+                        } elseif ($i == 1) { // Tên món
+                            $row .= str_pad(mb_substr($lineText, 0, $widths[$i], 'UTF-8'), $widths[$i], ' ', STR_PAD_RIGHT);
+                        } else { // số liệu thì canh phải
+                            // Chỉ hiển thị số liệu ở dòng đầu tiên
+                            $row .= str_pad($line === 0 ? $lineText : '', $widths[$i], ' ', STR_PAD_LEFT);
+                        }
+                    }
+                    $row .= "\n";
+                }
+
+                return $row;
             };
 
             $conn = $printer->getPrintConnector();
