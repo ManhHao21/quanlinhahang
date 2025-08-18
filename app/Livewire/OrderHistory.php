@@ -172,7 +172,7 @@ class OrderHistory extends Component
     function formatTableRow($cols)
     {
         // Thêm 1 phần tử rỗng ở vị trí khoảng trắng giữa đơn giá và thành tiền
-        $widths = [4, 15, 1, 6, 8, 1, 9]; // thêm 2 ký tự khoảng trắng
+        $widths = [4, 15, 1, 6, 8, 9]; // thêm 2 ký tự khoảng trắng
         $row = '';
 
         foreach ($cols as $i => $text) {
