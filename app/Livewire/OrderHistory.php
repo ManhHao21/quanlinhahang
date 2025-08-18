@@ -58,6 +58,7 @@ class OrderHistory extends Component
             $this->dispatch('notify', type: 'error', message: 'Vui lòng chọn đơn hàng để in');
             return;
         }
+
         $order = Order::with('orderItems.menu')->find($this->orderId);
         if (!$order) {
             $this->dispatch('notify', type: 'error', message: 'Không tìm thấy đơn hàng');
@@ -68,20 +69,28 @@ class OrderHistory extends Component
             $connector = new NetworkPrintConnector("192.168.1.235", 9100);
             $printer = new Printer($connector);
 
-            // Hàm bỏ dấu tiếng Việt và chỉ giữ ký tự ASCII
-            $removeAccents = function (?string $str): string {
+            // Bỏ dấu tiếng Việt
+            $this->removeAccents = function (?string $str): string {
                 if ($str === null || $str === '') {
                     return '';
                 }
                 $str = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $str);
-                return preg_replace('/[^ -~]/', '', $str); // Xóa ký tự ngoài ASCII
+                return preg_replace('/[^ -~]/', '', $str);
             };
 
-            // Hàm format hàng bảng (căn lề và tạo khoảng cách)
-            $formatTableRow = function (array $columns, array $widths = [4, 14, 4, 8, 10]): string {
+            // Format hàng bảng (cố định cột)
+            $formatTableRow = function (array $cols): string {
+                $widths = [4, 15, 6, 10, 12]; // STT | Tên món | SL | Đơn giá | Thành tiền
                 $row = '';
-                foreach ($columns as $i => $col) {
-                    $row .= str_pad($col, $widths[$i] ?? 10);
+                foreach ($cols as $i => $text) {
+                    $text = mb_substr($text, 0, $widths[$i], 'UTF-8');
+                    if ($i == 0) { // STT
+                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
+                    } elseif ($i == 1) { // Tên món
+                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
+                    } else { // số liệu thì canh phải
+                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_LEFT);
+                    }
                 }
                 return $row . "\n";
             };
@@ -91,12 +100,12 @@ class OrderHistory extends Component
             // Font A
             $conn->write(chr(27) . "M" . chr(0));
 
-            // Center alignment
+            // Center title
             $conn->write(chr(27) . "a" . chr(1));
             $conn->write($this->removeAccents("PHIEU TAM TINH") . "\n");
             $conn->write($this->removeAccents("So HD: #") . $order->id . "\n\n");
 
-            // Left alignment
+            // Left info
             $conn->write(chr(27) . "a" . chr(0));
             $conn->write($this->removeAccents("Ma HD: #") . $order->code . "\n");
             $conn->write($this->removeAccents("TN: ") . $this->removeAccents($order->customer_name) . "\n");
@@ -104,38 +113,34 @@ class OrderHistory extends Component
             $conn->write($this->removeAccents("Gio vao: ") . $order->created_at->format('H.i') . "\n");
             $conn->write($this->removeAccents("Gio ra: ") . now()->format('H.i') . "\n\n");
 
-            // Tiêu đề bảng
+            // Header table
             $conn->write($formatTableRow([
                 'STT',
                 'Ten mon',
-                '',
                 'SL',
                 'Don gia',
                 'Thanh tien'
             ]));
-            $conn->write(str_repeat('-', 42) . "\n");
+            $conn->write(str_repeat('-', 47) . "\n");
+
             $totalAmount = 0;
-            // Dữ liệu món ăn
             foreach ($order->orderItems as $index => $item) {
-                $conn->write($this->formatTableRow([
+                $conn->write($formatTableRow([
                     (string) ($index + 1),
                     $this->removeAccents($item->menu->name),
-                    "", // cột trống làm khoảng cách
                     (string) $item->quantity,
                     number_format($item->price, 0, ',', '.'),
-                    "",
                     number_format($item->price * $item->quantity, 0, ',', '.')
                 ]));
-
                 $totalAmount += $item->price * $item->quantity;
             }
 
-            $conn->write("------------------------------------------\n");
+            $conn->write(str_repeat('-', 47) . "\n");
             $conn->write($formatTableRow([
-                "",
-                "",
-                "Thanh tien:",
-                "",
+                '',
+                'Thanh tien:',
+                '',
+                '',
                 number_format($totalAmount, 0, ',', '.')
             ]));
 
@@ -151,13 +156,10 @@ class OrderHistory extends Component
             } else {
                 $conn->text("Không tìm thấy QR code\n");
             }
-
-
-
             $conn->write($this->removeAccents("Cam on quy khach") . "\n");
             $conn->write("Powered by iPOS.vn\n");
 
-            // Cut giấy
+            // Cut
             $conn->write(chr(29) . "V" . chr(1));
 
             $this->dispatch('notify', type: 'success', message: 'Đã in bill thành công');
@@ -169,10 +171,11 @@ class OrderHistory extends Component
             }
         }
     }
+
     function formatTableRow($cols)
     {
         // Thêm 1 phần tử rỗng ở vị trí khoảng trắng giữa đơn giá và thành tiền
-        $widths = [4, 15, 1, 6, 8, 9]; // thêm 2 ký tự khoảng trắng
+        $widths = [4, 15, 1, 6, 8, 1, 9]; // thêm 2 ký tự khoảng trắng
         $row = '';
 
         foreach ($cols as $i => $text) {

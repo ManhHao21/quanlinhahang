@@ -102,7 +102,7 @@ class Cart extends Component
             $printer = new Printer($connector);
 
             // Bỏ dấu tiếng Việt
-            $removeAccents = function (?string $str): string {
+            $this->removeAccents = function (?string $str): string {
                 if ($str === null || $str === '') {
                     return '';
                 }
@@ -134,16 +134,16 @@ class Cart extends Component
 
             // Center title
             $conn->write(chr(27) . "a" . chr(1));
-            $conn->write($removeAccents("PHIEU TAM TINH") . "\n");
-            $conn->write($removeAccents("So HD: #") . $order->id . "\n\n");
+            $conn->write($this->removeAccents("PHIEU TAM TINH") . "\n");
+            $conn->write($this->removeAccents("So HD: #") . $order->id . "\n\n");
 
             // Left info
             $conn->write(chr(27) . "a" . chr(0));
-            $conn->write($removeAccents("Ma HD: #") . $order->code . "\n");
-            $conn->write($removeAccents("TN: ") . $removeAccents($order->customer_name) . "\n");
-            $conn->write($removeAccents("Ngay: ") . $order->created_at->format('d/m/Y') . "\n");
-            $conn->write($removeAccents("Gio vao: ") . $order->created_at->format('H.i') . "\n");
-            $conn->write($removeAccents("Gio ra: ") . now()->format('H.i') . "\n\n");
+            $conn->write($this->removeAccents("Ma HD: #") . $order->code . "\n");
+            $conn->write($this->removeAccents("TN: ") . $this->removeAccents($order->customer_name) . "\n");
+            $conn->write($this->removeAccents("Ngay: ") . $order->created_at->format('d/m/Y') . "\n");
+            $conn->write($this->removeAccents("Gio vao: ") . $order->created_at->format('H.i') . "\n");
+            $conn->write($this->removeAccents("Gio ra: ") . now()->format('H.i') . "\n\n");
 
             // Header table
             $conn->write($formatTableRow([
@@ -159,7 +159,7 @@ class Cart extends Component
             foreach ($order->orderItems as $index => $item) {
                 $conn->write($formatTableRow([
                     (string) ($index + 1),
-                    $removeAccents($item->menu->name),
+                    $this->removeAccents($item->menu->name),
                     (string) $item->quantity,
                     number_format($item->price, 0, ',', '.'),
                     number_format($item->price * $item->quantity, 0, ',', '.')
@@ -179,8 +179,8 @@ class Cart extends Component
             // Footer
             $conn->write("\n------------------------------------------\n");
             $conn->write(chr(27) . "a" . chr(1));
-            $conn->write($removeAccents("MBBank") . "\n");
-            $conn->write($removeAccents("TRAN MAI THI") . "\n");
+            $conn->write($this->removeAccents("MBBank") . "\n");
+            $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
             $qrPath = public_path('images/qr.png');
             if (file_exists($qrPath)) {
                 $qrImg = EscposImage::load($qrPath, false);
@@ -188,7 +188,7 @@ class Cart extends Component
             } else {
                 $conn->text("Không tìm thấy QR code\n");
             }
-            $conn->write($removeAccents("Cam on quy khach") . "\n");
+            $conn->write($this->removeAccents("Cam on quy khach") . "\n");
             $conn->write("Powered by iPOS.vn\n");
 
             // Cut
