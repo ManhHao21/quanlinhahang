@@ -109,27 +109,14 @@ class Cart extends Component
                 return preg_replace('/[^ -~]/', '', $str); // Xóa ký tự ngoài ASCII
             };
 
-            $formatTableRow = function (array $columns, array $widths = [4, 15, 6, 8, 9]): string {
+            // Hàm format hàng bảng (căn lề và tạo khoảng cách)
+            $formatTableRow = function (array $columns, array $widths = [4, 14, 4, 8, 10]): string {
                 $row = '';
                 foreach ($columns as $i => $col) {
-                    $text = mb_substr((string) $col, 0, $widths[$i], 'UTF-8');
-
-                    // Căn giữa cho STT và cột trống
-                    if (in_array($i, [0, 2])) {
-                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_BOTH);
-                    }
-                    // Căn phải cho số lượng, đơn giá, thành tiền
-                    elseif ($i >= 3) {
-                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_LEFT);
-                    }
-                    // Căn trái cho tên món
-                    else {
-                        $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
-                    }
+                    $row .= str_pad($col, $widths[$i] ?? 10);
                 }
                 return $row . "\n";
             };
-
 
             $conn = $printer->getPrintConnector();
 
@@ -153,6 +140,7 @@ class Cart extends Component
             $conn->write($formatTableRow([
                 'STT',
                 'Ten mon',
+                '',
                 'SL',
                 'Don gia',
                 'Thanh tien'
@@ -167,6 +155,7 @@ class Cart extends Component
                     "", // cột trống làm khoảng cách
                     (string) $item->quantity,
                     number_format($item->price, 0, ',', '.'),
+                    "",
                     number_format($item->price * $item->quantity, 0, ',', '.')
                 ]));
 
@@ -215,7 +204,7 @@ class Cart extends Component
     function formatTableRow($cols)
     {
         // Thêm 1 phần tử rỗng ở vị trí khoảng trắng giữa đơn giá và thành tiền
-        $widths = [4, 15, 6, 8, 9]; // thêm 2 ký tự khoảng trắng
+        $widths = [4, 15, 1, 6, 8, 9]; // thêm 2 ký tự khoảng trắng
         $row = '';
 
         foreach ($cols as $i => $text) {
