@@ -172,8 +172,8 @@ class Cart extends Component
             $conn->write($this->removeAccents("MBBank") . "\n");
             $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
             $conn->write("0975410133\n\n");
-            $qrPath = 'public/images/qr.png'; // Đường dẫn file ảnh QR code
-            dd(file_exists($qrPath));
+            $qrPath = public_path('images/qr.png');
+
             if (file_exists($qrPath)) {
                 $qrImg = EscposImage::load($qrPath, false);
                 $printer->bitImage($qrImg);

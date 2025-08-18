@@ -139,7 +139,7 @@ class OrderHistory extends Component
             $conn->write(chr(27) . "a" . chr(1));
             $conn->write($this->removeAccents("MBBank") . "\n");
             $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
-           $qrPath = 'public/images/qr.png'; // Đường dẫn file ảnh QR code
+          $qrPath = public_path('images/qr.png');
             dd(file_exists($qrPath));
             if (file_exists($qrPath)) {
                 $qrImg = EscposImage::load($qrPath, false);
@@ -147,6 +147,7 @@ class OrderHistory extends Component
             } else {
                 $conn->text("Không tìm thấy QR code\n");
             }
+
 
 
             $conn->write($this->removeAccents("Cam on quy khach") . "\n");
