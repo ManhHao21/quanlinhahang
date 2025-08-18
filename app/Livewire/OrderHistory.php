@@ -108,8 +108,10 @@ class OrderHistory extends Component
             $conn->write($formatTableRow([
                 'STT',
                 'Ten mon',
+                '',
                 'SL',
                 'Don gia',
+                '',
                 'Thanh tien'
             ]));
             $conn->write(str_repeat('-', 42) . "\n");
