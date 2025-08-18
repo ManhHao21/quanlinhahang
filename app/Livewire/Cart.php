@@ -162,7 +162,6 @@ class Cart extends Component
 
                 $totalAmount += $item->price * $item->quantity;
             }
-            dd($totalAmount);
 
             $conn->write("------------------------------------------\n");
             $conn->write($formatTableRow([
@@ -179,7 +178,6 @@ class Cart extends Component
             $conn->write($this->removeAccents("MBBank") . "\n");
             $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
             $qrPath = public_path('images/qr.png');
-            dd(file_exists($qrPath));
             if (file_exists($qrPath)) {
                 $qrImg = EscposImage::load($qrPath, false);
                 $printer->bitImage($qrImg);
