@@ -145,7 +145,7 @@ class Cart extends Component
                 'Thanh tien'
             ]));
             $conn->write(str_repeat('-', 42) . "\n");
-
+            $totalAmount = 0;
             // Dữ liệu món ăn
             foreach ($order->orderItems as $index => $item) {
                 $conn->write($formatTableRow([
@@ -155,6 +155,7 @@ class Cart extends Component
                     number_format($item->price, 0, ',', '.'),
                     number_format($item->price * $item->quantity, 0, ',', '.')
                 ]));
+                $totalAmount += $item->price * $item->quantity;
             }
 
             $conn->write("------------------------------------------\n");
@@ -163,7 +164,7 @@ class Cart extends Component
                 "",
                 "Thanh tien:",
                 "",
-                number_format($order->total, 0, ',', '.')
+                number_format($totalAmount, 0, ',', '.')
             ]));
 
             // Footer
@@ -171,15 +172,15 @@ class Cart extends Component
             $conn->write(chr(27) . "a" . chr(1));
             $conn->write($this->removeAccents("MBBank") . "\n");
             $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
-            $conn->write("0975410133\n\n");
             $qrPath = public_path('images/qr.png');
-
+            dd(file_exists($qrPath));
             if (file_exists($qrPath)) {
                 $qrImg = EscposImage::load($qrPath, false);
                 $printer->bitImage($qrImg);
             } else {
                 $conn->text("Không tìm thấy QR code\n");
             }
+
 
 
             $conn->write($this->removeAccents("Cam on quy khach") . "\n");

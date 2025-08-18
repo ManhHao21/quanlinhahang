@@ -113,7 +113,7 @@ class OrderHistory extends Component
                 'Thanh tien'
             ]));
             $conn->write(str_repeat('-', 42) . "\n");
-
+            $totalAmount = 0;
             // Dữ liệu món ăn
             foreach ($order->orderItems as $index => $item) {
                 $conn->write($formatTableRow([
@@ -123,6 +123,7 @@ class OrderHistory extends Component
                     number_format($item->price, 0, ',', '.'),
                     number_format($item->price * $item->quantity, 0, ',', '.')
                 ]));
+                $totalAmount += $item->price * $item->quantity;
             }
 
             $conn->write("------------------------------------------\n");
@@ -131,7 +132,7 @@ class OrderHistory extends Component
                 "",
                 "Thanh tien:",
                 "",
-                number_format($order->total, 0, ',', '.')
+                number_format( $totalAmount, 0, ',', '.')
             ]));
 
             // Footer
