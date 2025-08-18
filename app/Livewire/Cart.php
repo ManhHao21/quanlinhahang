@@ -109,7 +109,7 @@ class Cart extends Component
                 return preg_replace('/[^ -~]/', '', $str); // Xóa ký tự ngoài ASCII
             };
 
-            $formatTableRow = function (array $columns, array $widths = [4, 15, 1, 6, 8, 9]): string {
+            $formatTableRow = function (array $columns, array $widths = [4, 15, 6, 8, 9]): string {
                 $row = '';
                 foreach ($columns as $i => $col) {
                     $text = mb_substr((string) $col, 0, $widths[$i], 'UTF-8');
@@ -153,7 +153,6 @@ class Cart extends Component
             $conn->write($formatTableRow([
                 'STT',
                 'Ten mon',
-                '',
                 'SL',
                 'Don gia',
                 'Thanh tien'
@@ -216,7 +215,7 @@ class Cart extends Component
     function formatTableRow($cols)
     {
         // Thêm 1 phần tử rỗng ở vị trí khoảng trắng giữa đơn giá và thành tiền
-        $widths = [4, 15, 1, 6, 8, 9]; // thêm 2 ký tự khoảng trắng
+        $widths = [4, 15, 6, 8, 9]; // thêm 2 ký tự khoảng trắng
         $row = '';
 
         foreach ($cols as $i => $text) {
