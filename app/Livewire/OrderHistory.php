@@ -125,6 +125,7 @@ class OrderHistory extends Component
                 ]));
                 $totalAmount += $item->price * $item->quantity;
             }
+            dd($totalAmount);
 
             $conn->write("------------------------------------------\n");
             $conn->write($formatTableRow([
@@ -132,7 +133,7 @@ class OrderHistory extends Component
                 "",
                 "Thanh tien:",
                 "",
-                number_format( $totalAmount, 0, ',', '.')
+                number_format($totalAmount, 0, ',', '.')
             ]));
 
             // Footer
@@ -140,7 +141,7 @@ class OrderHistory extends Component
             $conn->write(chr(27) . "a" . chr(1));
             $conn->write($this->removeAccents("MBBank") . "\n");
             $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
-          $qrPath = public_path('images/qr.png');
+            $qrPath = public_path('images/qr.png');
             dd(file_exists($qrPath));
             if (file_exists($qrPath)) {
                 $qrImg = EscposImage::load($qrPath, false);
@@ -165,6 +166,24 @@ class OrderHistory extends Component
                 $printer->close();
             }
         }
+    }
+    function formatTableRow($cols)
+    {
+        // Thêm 1 phần tử rỗng ở vị trí khoảng trắng giữa đơn giá và thành tiền
+        $widths = [4, 15, 6, 8, 2, 9]; // Tổng = 42
+        $row = '';
+
+        foreach ($cols as $i => $text) {
+            $text = mb_substr($text, 0, $widths[$i], 'UTF-8');
+            if (in_array($i, [0, 2])) {
+                $row .= str_pad($text, $widths[$i], ' ', STR_PAD_BOTH);
+            } elseif ($i >= 3) {
+                $row .= str_pad($text, $widths[$i], ' ', STR_PAD_LEFT);
+            } else {
+                $row .= str_pad($text, $widths[$i], ' ', STR_PAD_RIGHT);
+            }
+        }
+        return $row . "\n";
     }
 
     public function render()

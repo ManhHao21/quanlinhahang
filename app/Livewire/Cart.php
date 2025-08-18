@@ -157,6 +157,7 @@ class Cart extends Component
                 ]));
                 $totalAmount += $item->price * $item->quantity;
             }
+            dd($totalAmount);
 
             $conn->write("------------------------------------------\n");
             $conn->write($formatTableRow([
@@ -201,7 +202,7 @@ class Cart extends Component
     function formatTableRow($cols)
     {
         // Thêm 1 phần tử rỗng ở vị trí khoảng trắng giữa đơn giá và thành tiền
-        $widths = [4, 15, 4, 8, 2, 9]; // Tổng = 42
+        $widths = [4, 15, 6, 8, 2, 9]; // Tổng = 42
         $row = '';
 
         foreach ($cols as $i => $text) {
