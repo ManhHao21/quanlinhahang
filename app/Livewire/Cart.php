@@ -127,6 +127,25 @@ class Cart extends Component
 
                 return $str;
             };
+            // Hàm wrap text xuống dòng theo độ rộng
+            $wrapText = function (string $text, int $width): array {
+                $lines = [];
+                $words = explode(' ', $text);
+                $current = '';
+
+                foreach ($words as $word) {
+                    if (mb_strlen($current . ' ' . $word) <= $width) {
+                        $current .= ($current === '' ? '' : ' ') . $word;
+                    } else {
+                        $lines[] = $current;
+                        $current = $word;
+                    }
+                }
+                if ($current !== '') {
+                    $lines[] = $current;
+                }
+                return $lines;
+            };
 
 
             // Format hàng bảng (cố định cột)
@@ -179,7 +198,7 @@ class Cart extends Component
             foreach ($order->orderItems as $index => $item) {
                 $conn->write($formatTableRow([
                     (string) ($index + 1),
-                    $removeAccents($item->menu->name),
+                    $removeAccents($wrapText($item->menu->name, 15)),
                     (string) $item->quantity,
                     number_format($item->price, 0, ',', '.'),
                     number_format($item->price * $item->quantity, 0, ',', '.')
