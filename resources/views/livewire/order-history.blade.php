@@ -76,10 +76,10 @@
                                     Đã thanh toán
                                 </button>
                             @endif
-                            <button wire:click="printInvoice({{ $order->id }})"
+                            {{-- <button wire:click="printInvoice({{ $order->id }})"
                                 class="btn btn-sm btn-secondary shadow-sm">
                                 In hóa đơn
-                            </button>
+                            </button> --}}
                         </td>
                     </tr>
                 @empty

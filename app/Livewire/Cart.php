@@ -139,8 +139,9 @@ class Cart extends Component
 
             // Left info
             $conn->write(chr(27) . "a" . chr(0));
-            $conn->write($this->removeAccents("Ma HD: #") . $order->code . "\n");
-            $conn->write($this->removeAccents("TN: ") . $this->removeAccents($order->customer_name) . "\n");
+            $conn->write($this->removeAccents("Ma HD: #") . $order->bill_code . "\n");
+            $conn->write($this->removeAccents("Số bàn: ") . $this->removeAccents($order->table_number ?? "N/a") . "\n");
+            $conn->write($this->removeAccents("Tên bàn: ") . $this->removeAccents($order->table_name ?? "N/a") . "\n");
             $conn->write($this->removeAccents("Ngay: ") . $order->created_at->format('d/m/Y') . "\n");
             $conn->write($this->removeAccents("Gio vao: ") . $order->created_at->format('H.i') . "\n");
             $conn->write($this->removeAccents("Gio ra: ") . now()->format('H.i') . "\n\n");
