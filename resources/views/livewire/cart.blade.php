@@ -12,7 +12,21 @@
                 </div>
             @endif
         </div>
+        @if (session()->has('message'))
+            <div class="alert alert-success">
+                {{ session('message') }}
+            </div>
+        @endif
 
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="card-body">
             <div class="row g-3">
                 <div class="col-md-6">
@@ -29,9 +43,9 @@
                         <div class="text-danger small">{{ $message }}</div>
                     @enderror
                 </div>
-
             </div>
         </div>
+
     </div>
 
     <!-- Order Items Section -->
@@ -42,9 +56,12 @@
             </div>
             <div class="card-body" style="max-height: 400px; overflow-y: auto;">
                 <ul class="list-group mb-3">
+                    @php
+                        $total = $orders->orderItems->sum(function ($item) {
+                            return $item->price * $item->quantity;
+                        });
+                    @endphp
                     @foreach ($orders->orderItems as $index => $item)
-                        @php
-                        @endphp
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div class="flex-grow-1">
                                 <strong>{{ $item->menu?->name }}</strong>
@@ -73,16 +90,16 @@
             <span class="text-primary">{{ number_format($total, 0, ',', '.') }}đ</span>
         </div>
         <div class="d-flex" style="gap: 10px;">
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="tempOrder({{ $orders->id }})"
-                {{ isset($orders->id) ? '' : 'disabled' }}>
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10 {{ $orderId ? 'd-none' : '' }}"
+                wire:click="tempOrder({{ $orders->id }})" {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Lưu tạm thời
             </button>
 
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice"
-                {{ isset($orders->id) ? '' : 'disabled' }}>
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10"
+                wire:click="paymentSuccess({{ $orderId }})" {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Đã thanh toán
             </button>
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice"
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice({{ $orderId }})"
                 {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> In hóa đơn
             </button>
@@ -95,7 +112,10 @@
 </div>
 <script>
     document.addEventListener('livewire:init', () => {
-        Livewire.on('notify', ({ type, message }) => {
+        Livewire.on('notify', ({
+            type,
+            message
+        }) => {
             // vẫn hiện toast/alert như trước
             alert(type.toUpperCase() + ': ' + message);
         });
@@ -105,4 +125,3 @@
         });
     });
 </script>
- 

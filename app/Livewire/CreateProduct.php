@@ -24,7 +24,7 @@ class CreateProduct extends Component
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string|max:1000',
-            'image' => $this->menuId ? 'nullable|image|max:2048' : 'required|image|max:2048',
+            // 'image' => $this->menuId ? 'nullable|image|max:2048' : 'required|image|max:2048',
         ]);
 
         if ($this->menuId) {

@@ -40,8 +40,8 @@
                     <th class="border px-3 py-2">Bàn</th>
                     <th class="border px-3 py-2">Ngày đặt</th>
                     <th class="border px-3 py-2">Tổng</th>
-                    <th class="border px-3 py-2">Tình trạng</th> <!-- Thêm cột mới -->
-                    <th class="border px-3 py-2"></th> <!-- Thêm cột mới -->
+                    <th class="border px-3 py-2">Tình trạng</th>
+                    <th class="border px-3 py-2"></th>
                 </tr>
             </thead>
             <tbody>
@@ -70,24 +70,21 @@
                                 class="btn btn-sm btn-info shadow-sm me-1">
                                 Xem chi tiết
                             </button>
-
                             @if ($order->status !== 'success')
                                 <button wire:click="markAsPaid({{ $order->id }})"
                                     class="btn btn-sm btn-success shadow-sm me-1">
                                     Đã thanh toán
                                 </button>
                             @endif
-
                             <button wire:click="printInvoice({{ $order->id }})"
                                 class="btn btn-sm btn-secondary shadow-sm">
                                 In hóa đơn
                             </button>
                         </td>
-
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center text-muted fst-italic py-3">
+                        <td colspan="6" class="text-center text-muted fst-italic py-3">
                             Không có dữ liệu
                         </td>
                     </tr>
@@ -97,7 +94,9 @@
     </div>
 
     {{-- Phân trang --}}
-    <div class="mt-4">
-        {{ $orders->links() }}
+    <div class="mt-3 d-flex justify-content-center">
+        {{ $orders->links('pagination::bootstrap-5') }}
     </div>
+
+
 </div>

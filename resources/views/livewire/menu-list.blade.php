@@ -4,8 +4,6 @@
 
     {{-- Danh sách món --}}
     <div class="row g-3 overflow-auto" style="height: calc(100vh - 120px);">
-        @php
-        @endphp
         @foreach ($menuItems as $item)
             @php
                 $isChecked = in_array($item->id, $selectedItems ?? []);

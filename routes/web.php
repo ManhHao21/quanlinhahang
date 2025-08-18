@@ -34,5 +34,9 @@ Route::get('/order-history', function () {
 })->name('order.history');
 
 Route::get('/orders/{id}', function($id) {
-    return view('show', compact('id'));
+    $order = \App\Models\Order::with('orderItems.menu')->findOrFail($id);
+    if (!$order) {
+        abort(404, 'Order not found');
+    }
+    return view('show', compact('id', 'order'));
 })->name('orders.show');

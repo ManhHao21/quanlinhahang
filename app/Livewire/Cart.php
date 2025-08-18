@@ -3,11 +3,13 @@
 namespace App\Livewire;
 
 use Exception;
+use Normalizer;
+use App\Models\Menu;
 use App\Models\Order;
 use Livewire\Component;
-use Normalizer;
 use App\Models\OrderItem;
 use Mike42\Escpos\Printer;
+use Mike42\Escpos\EscposImage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,9 +23,8 @@ class Cart extends Component
     public $total = 0;
 
     // Additional fields for order information
-    public $tableNumber = '';
-    public $tableName = '';
-    public $staffName = '';
+    public $tableNumber;
+    public $tableName;
     public $orderDate;
     public $startTime;
     public $endTime;
@@ -66,12 +67,6 @@ class Cart extends Component
             }
         }
     }
-
-    public function handleSelectedItems($selectedItems)
-    {
-        $this->selectedItems = $selectedItems;
-    }
-
     public function saveOrderInfo()
     {
         if ($this->orderId) {
@@ -88,10 +83,14 @@ class Cart extends Component
             }
         }
     }
-    public function printInvoice()
+    public function printInvoice($id)
     {
+        $this->orderId = $id;
+        if (!$this->orderId) {
+            $this->dispatch('notify', type: 'error', message: 'Vui lòng chọn đơn hàng để in');
+            return;
+        }
         $order = Order::with('orderItems.menu')->find($this->orderId);
-
         if (!$order) {
             $this->dispatch('notify', type: 'error', message: 'Không tìm thấy đơn hàng');
             return;
@@ -126,7 +125,6 @@ class Cart extends Component
 
             // Center alignment
             $conn->write(chr(27) . "a" . chr(1));
-            $conn->write($this->removeAccents("iPOS.vn") . "\n\n");
             $conn->write($this->removeAccents("PHIEU TAM TINH") . "\n");
             $conn->write($this->removeAccents("So HD: #") . $order->id . "\n\n");
 
@@ -174,6 +172,9 @@ class Cart extends Component
             $conn->write($this->removeAccents("MBBank") . "\n");
             $conn->write($this->removeAccents("TRAN MAI THI") . "\n");
             $conn->write("0975410133\n\n");
+            $qrPath = public_path('images/qrcode.png'); // Đường dẫn file ảnh
+            $qrImg = EscposImage::load($qrPath, false); // false = giữ nguyên
+
             $conn->write($this->removeAccents("Cam on quy khach") . "\n");
             $conn->write("Powered by iPOS.vn\n");
 
@@ -189,7 +190,6 @@ class Cart extends Component
             }
         }
     }
-
     function formatTableRow($cols)
     {
         // Thêm 1 phần tử rỗng ở vị trí khoảng trắng giữa đơn giá và thành tiền
@@ -303,9 +303,48 @@ class Cart extends Component
         $this->dispatch('reloadPage');
     }
 
+    public function paymentSuccess($orderId = null)
+    {
+        $this->validate([
+            'tableNumber' => 'required|integer',
+            'tableName' => 'required|string|max:255',
+        ], [
+            'tableNumber.required' => 'Số bàn là bắt buộc',
+            'tableNumber.integer' => 'Số bàn phải là số',
+            'tableName.required' => 'Tên bàn là bắt buộc',
+        ]);
+
+        DB::transaction(function () use ($orderId) {
+            // 1. Tạo hoặc cập nhật Order
+            $order = Order::find($this->orderId);
+            if (!$order) {
+                $order = new Order();
+                $order->bill_code = Order::generateBillCode();
+            }
+
+            $order->table_number = $this->tableNumber;
+            $order->table_name = $this->tableName;
+            $order->date_ordered = now();
+            $order->start_time = now();
+            $order->end_time = now()->addHours(1);
+            $order->status = Order::STATUS_SUCCESS;
+            $order->save();
+
+            // $this->dispatch('order-updated', orderId: $order->id);
+            session()->flash('message', 'Đơn hàng đã được thanh toán thành công với mã hóa đơn: ' . $order->bill_code);
+        });
+    }
     public function render()
     {
         $order = Order::with('orderItems.menu')->find($this->orderId);
+        if ($order) {
+            $this->tableName = $order->table_name;
+            $this->tableNumber = $order->table_number;
+            $this->staffName = $order->staff_name;
+            $this->orderDate = $order->date_ordered;
+            $this->startTime = $order->start_time;
+            $this->endTime = $order->end_time;
+        }
         return view('livewire.cart', [
             'orders' => $order ? $order : new Order(),
         ]);

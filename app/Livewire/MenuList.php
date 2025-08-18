@@ -25,7 +25,7 @@ class MenuList extends Component
     {
         $this->selectedItems = $selectedItems;
     }
-    public function mount($orderId)
+    public function mount($orderId = null): void
     {
         $this->orderId = $orderId;
         $this->menuItems = Menu::all();
@@ -90,21 +90,12 @@ class MenuList extends Component
                         'menu_id' => $menu->id
                     ]);
 
-                    // Logic để tăng số lượng khi click lại 
-                    // (Bạn đã thêm logic này, nhưng nó bị lỗi, tôi sẽ sửa lại cho đúng)
                     if ($orderItem->exists) {
-                        // Nếu đã tồn tại, tăng số lượng lên 1. (Đây là logic bạn đã viết, có thể bạn muốn nó khác đi)
                         $orderItem->quantity = 1;
                     } else {
-                        // Nếu chưa tồn tại, đặt số lượng là 1
                         $orderItem->quantity = 1;
                     }
 
-                    // Logic của bạn:
-                    // $orderItem->quantity = $orderItem->exists ? $orderItem->quantity + 1 : 1;
-                    // Lỗi: dòng này sẽ tăng số lượng lên 1 mỗi khi toggle lại, nhưng toggleItem() của bạn chỉ thêm/bớt ID
-                    // Nếu bạn muốn tăng số lượng, bạn cần một phương thức riêng, ví dụ `increaseQuantity($id)`.
-                    // Với `toggleItem`, logic hiện tại của bạn là chọn/bỏ, nên quantity nên là 1
                     $orderItem->price = $menu->price;
                     $orderItem->save();
 
@@ -129,6 +120,12 @@ class MenuList extends Component
             })
             ->orderBy('name')
             ->get();
+            if($this->orderId) {
+                $this->currentOrderId = $this->orderId;
+                $this->selectedItems = OrderItem::where('order_id', $this->currentOrderId)
+                    ->pluck('menu_id')
+                    ->toArray();
+            }
         return view('livewire.menu-list', compact('menuItems'));
     }
 }
