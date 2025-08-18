@@ -67,6 +67,10 @@ class Cart extends Component
         }
     }
 
+    public function handleSelectedItems($selectedItems)
+    {
+        $this->selectedItems = $selectedItems;
+    }
 
     public function saveOrderInfo()
     {
