@@ -32,7 +32,34 @@ class Cart extends Component
         'select-item' => 'handleSelectedItems',
         'order-updated' => 'loadOrder',
     ];
+    public $quantities = [];
 
+    public function mount($orderId = null)
+    {
+        $this->orderId = $orderId;
+        $this->loadOrder($orderId);
+    }
+
+    public function updatedQuantities($value, $id)
+    {
+        $item = OrderItem::find($id);
+        if ($item) {
+            $item->update(['quantity' => max(1, (int) $value)]);
+            $this->loadOrder($this->orderId); // reload lại dữ liệu
+        }
+    }
+    public function removeItem($itemId)
+    {
+        if ($this->orderId) {
+            $order = Order::with('orderItems.menu')->find($this->orderId);
+        }
+        $item = $order->orderItems->find($itemId);
+        if ($item) {
+            $item->delete(); // xoá record trong DB
+            unset($this->quantities[$itemId]); // xoá trong mảng quantities
+            $order->refresh(); // load lại order để cập nhật list
+        }
+    }
     public function handleSelectedItems($selectedItems)
     {
         $this->selectedItems = $selectedItems;
@@ -47,7 +74,6 @@ class Cart extends Component
             $order = Order::with('orderItems.menu')->find($this->orderId);
 
             if ($order) {
-                // cập nhật dữ liệu như hiện tại
                 $this->items = $order->orderItems->map(function ($item) {
                     return [
                         'id' => $item->id,
@@ -55,6 +81,10 @@ class Cart extends Component
                         'price' => $item->price,
                         'qty' => $item->quantity,
                     ];
+                })->toArray();
+
+                $this->quantities = $order->orderItems->mapWithKeys(function ($item) {
+                    return [$item->id => $item->quantity];
                 })->toArray();
 
                 $this->total = $order->total;
@@ -65,6 +95,7 @@ class Cart extends Component
                 $this->startTime = $order->start_time;
                 $this->endTime = $order->end_time;
             }
+
         }
     }
     public function saveOrderInfo()
@@ -294,35 +325,31 @@ class Cart extends Component
 
     public function decreaseQty($itemId)
     {
-        Log::info($this->selectedItems);
-
         $item = OrderItem::find($itemId);
         if ($item && $item->quantity > 1) {
             $item->decrement('quantity');
             $this->total -= $item->price;
+            $this->quantities[$itemId] = $item->quantity - 1; // đồng bộ input
         } elseif ($item && $item->quantity == 1) {
-            // Remove item if quantity is 1
             $menuId = $item->menu_id;
             $item->delete();
             $this->total -= $item->price;
+            unset($this->quantities[$itemId]); // xóa input nếu hết hàng
             $this->selectedItems = array_values(array_diff($this->selectedItems, [$menuId]));
-
-            Log::info('Selected Items after deletion: ', ['selectedItems' => $this->selectedItems]);
             $this->dispatch('select-item', selectedItems: $this->selectedItems);
         }
     }
 
-
     public function increaseQty($itemId)
     {
-        Log::info($this->selectedItems);
-
         $item = OrderItem::find($itemId);
         if ($item) {
             $item->increment('quantity');
             $this->total += $item->price;
+            $this->quantities[$itemId] = $item->quantity + 1; // đồng bộ input
         }
     }
+
     public function tempOrder($id)
     {
         if ($id == null) {
