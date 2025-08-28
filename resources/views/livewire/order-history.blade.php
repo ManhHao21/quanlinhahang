@@ -56,26 +56,38 @@
                             {{ number_format($order->total, 0, ',', '.') }} đ
                         </td>
                         <td class="border px-3 py-2">
-                            @if ($order->status === 'success')
+                            @if ($order->status === \App\Models\Order::STATUS_SUCCESS)
                                 <span class="bg-green-100 text-green-600 px-2 py-1 rounded text-sm">Đã thanh toán</span>
-                            @elseif($order->status === 'pending')
+                            @elseif($order->status === \App\Models\Order::STATUS_PENDING)
                                 <span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded text-sm">Chờ thanh
                                     toán</span>
-                            @else
-                                <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-sm">Đã hủy</span>
+                            @elseif($order->status === \App\Models\Order::STATUS_TEMPOLARY)
+                                <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-sm">Lưu tạm thời</span>
                             @endif
                         </td>
                         <td class="border px-3 py-2">
                             <button wire:click="viewOrderDetails({{ $order->id }})"
                                 class="btn btn-sm btn-info shadow-sm me-1">
                                 Xem chi tiết
+                            {{-- @if ($order->status !== 'success') --}}
+                            <button wire:click="markAsPaid({{ $order->id }})"
+                                class="btn btn-sm btn-success shadow-sm me-1">
+
+                                @switch($order->status)
+                                    @case(\App\Models\Order::STATUS_SUCCESS)
+                                        Đã thanh toán
+                                        @break
+
+                                    @case(\App\Models\Order::STATUS_PENDING)
+                                        Chờ thanh toán
+                                        @break
+
+                                    @default
+                                        Lưu tạm thời
+                                @endswitch
                             </button>
-                            @if ($order->status !== 'success')
-                                <button wire:click="markAsPaid({{ $order->id }})"
-                                    class="btn btn-sm btn-success shadow-sm me-1">
-                                    Đã thanh toán
-                                </button>
-                            @endif
+
+                            {{-- @endif --}}
                             {{-- <button wire:click="printInvoice({{ $order->id }})"
                                 class="btn btn-sm btn-secondary shadow-sm">
                                 In hóa đơn

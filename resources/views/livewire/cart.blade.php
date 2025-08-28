@@ -104,12 +104,16 @@
             <span class="text-primary">{{ number_format($total, 0, ',', '.') }}đ</span>
         </div>
         <div class="d-flex" style="gap: 10px;">
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10 {{ $orderId ? 'd-none' : '' }}"
+            {{-- <button class="btn btn-success w-150 mt-3 py-2 fs-10 {{ $orderId ? 'd-none' : '' }}"
                 wire:click="tempOrder({{ $orders->id }})" {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Lưu tạm thời
+            </button> --}}
+            {{$orders}}
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10 {{$orders->status != \App\Models\Order::STATUS_TEMPOLARY ? 'd-none' : ''}}" wire:click="tempOrder({{ $orderId }})"
+                {{ isset($orders->id) ? '' : 'disabled' }}>
+                <i class="fas fa-print me-2"></i> Lưu tạm thời
             </button>
-
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="paymentSuccess({{ $orderId }})"
+            <button class="btn btn-success w-150 mt-3 py-2 fs-10 {{$orders->status != \App\Models\Order::STATUS_SUCCESS ? '' : 'd-none'}}" wire:click="paymentSuccess({{ $orderId }})"
                 {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Đã thanh toán
             </button>

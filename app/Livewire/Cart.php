@@ -359,13 +359,13 @@ class Cart extends Component
             ]);
             return;
         }
-        // Validate dữ liệu đầu vào
-        $this->validate([
-            'tableNumber' => 'required|integer',
-        ], [
-            'tableNumber.required' => 'Số bàn là bắt buộc',
-            'tableNumber.integer' => 'Số bàn phải là số',
-        ]);
+        // // Validate dữ liệu đầu vào
+        // $this->validate([
+        //     'tableNumber' => 'required|integer',
+        // ], [
+        //     'tableNumber.required' => 'Số bàn là bắt buộc',
+        //     'tableNumber.integer' => 'Số bàn phải là số',
+        // ]);
 
         // Lấy order kèm món ăn
         $order = Order::with('orderItems')->find($id);
@@ -390,7 +390,7 @@ class Cart extends Component
         // Cập nhật trạng thái + 2 cột khác
         $order->update([
             'status' => Order::STATUS_TEMPOLARY,
-            'table_number' => $this->tableNumber, // lấy từ form/livewire
+            'table_number' => $this->tableNumber ?? "", // lấy từ form/livewire
             'bill_code' => $this->billCode ?? $order->bill_code, // nếu có input bill_code
         ]);
 
@@ -404,14 +404,14 @@ class Cart extends Component
 
     public function paymentSuccess($orderId = null)
     {
-        $this->validate([
-            'tableNumber' => 'required|integer',
-            'tableName' => 'required|string|max:255',
-        ], [
-            'tableNumber.required' => 'Số bàn là bắt buộc',
-            'tableNumber.integer' => 'Số bàn phải là số',
-            'tableName.required' => 'Tên bàn là bắt buộc',
-        ]);
+        // $this->validate([
+        //     'tableNumber' => 'required|integer',
+        //     'tableName' => 'required|string|max:255',
+        // ], [
+        //     'tableNumber.required' => 'Số bàn là bắt buộc',
+        //     'tableNumber.integer' => 'Số bàn phải là số',
+        //     'tableName.required' => 'Tên bàn là bắt buộc',
+        // ]);
 
         DB::transaction(function () use ($orderId) {
             // 1. Tạo hoặc cập nhật Order
@@ -421,8 +421,8 @@ class Cart extends Component
                 $order->bill_code = Order::generateBillCode();
             }
 
-            $order->table_number = $this->tableNumber;
-            $order->table_name = $this->tableName;
+            $order->table_number = $this->tableNumber ?? "chưa nhập";
+            $order->table_name = $this->tableName ?? "chưa nhập";
             $order->date_ordered = now();
             $order->start_time = now();
             $order->end_time = now()->addHours(1);
