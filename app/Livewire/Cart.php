@@ -53,13 +53,23 @@ class Cart extends Component
         if ($this->orderId) {
             $order = Order::with('orderItems.menu')->find($this->orderId);
         }
-        $item = $order->orderItems->find($itemId);
+
+        $item = $order?->orderItems->find($itemId);
+
         if ($item) {
             $item->delete(); // xoá record trong DB
             unset($this->quantities[$itemId]); // xoá trong mảng quantities
-            $order->refresh(); // load lại order để cập nhật list
+
+            // reload lại quan hệ orderItems để không dính cache
+            $order->load('orderItems');
+
+            // cập nhật lại tổng tiền order
+            $order->total = $order->orderItems->sum(fn($i) => $i->total_price);
+            $order->save();
         }
     }
+
+
     public function handleSelectedItems($selectedItems)
     {
         $this->selectedItems = $selectedItems;
@@ -326,17 +336,28 @@ class Cart extends Component
     public function decreaseQty($itemId)
     {
         $item = OrderItem::find($itemId);
+
         if ($item && $item->quantity > 1) {
+            // giảm số lượng
             $item->decrement('quantity');
             $this->total -= $item->price;
-            $this->quantities[$itemId] = $item->quantity - 1; // đồng bộ input
+            $this->quantities[$itemId] = $item->quantity;
         } elseif ($item && $item->quantity == 1) {
+            // xoá item khi quantity = 1
             $menuId = $item->menu_id;
-            $item->delete();
             $this->total -= $item->price;
-            unset($this->quantities[$itemId]); // xóa input nếu hết hàng
+            $item->delete();
+
+            unset($this->quantities[$itemId]);
             $this->selectedItems = array_values(array_diff($this->selectedItems, [$menuId]));
             $this->dispatch('select-item', selectedItems: $this->selectedItems);
+        }
+
+        // cập nhật lại tổng tiền order
+        if ($item) {
+            $order = $item->order;
+            $orderTotal = $order->orderItems->sum(fn($i) => $i->total_price); // dùng accessor total_price
+            $order->update(['total' => $orderTotal]);
         }
     }
 
@@ -344,11 +365,19 @@ class Cart extends Component
     {
         $item = OrderItem::find($itemId);
         if ($item) {
+            // tăng số lượng
             $item->increment('quantity');
-            $this->total += $item->price;
-            $this->quantities[$itemId] = $item->quantity + 1; // đồng bộ input
+
+            // đồng bộ input
+            $this->quantities[$itemId] = $item->quantity;
+
+            // cập nhật lại tổng của order
+            $order = $item->order;
+            $orderTotal = $order->orderItems->sum(fn($i) => $i->total_price);
+            $order->update(['total' => $orderTotal]);
         }
     }
+
 
     public function tempOrder($id)
     {

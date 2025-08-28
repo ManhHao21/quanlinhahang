@@ -37,11 +37,11 @@ class OrderHistory extends Component
     private function calculateRevenue()
     {
         // Doanh thu theo ngày
-        $this->totalDaily = Order::whereDate('date_ordered', $this->date)
+        $this->totalDaily = Order::whereDate('date_ordered', $this->date)->where('status', Order::STATUS_SUCCESS)
             ->sum('total');
 
         // Doanh thu theo tháng
-        $this->totalMonthly = Order::whereMonth('date_ordered', Carbon::parse($this->date)->month)
+        $this->totalMonthly = Order::whereMonth('date_ordered', Carbon::parse($this->date)->month)->where('status', Order::STATUS_SUCCESS)
             ->whereYear('date_ordered', Carbon::parse($this->date)->year)
             ->sum('total');
     }
@@ -211,9 +211,17 @@ class OrderHistory extends Component
             'orders' => $orders,
         ]);
     }
-
-    public function clearFilters()
+    
+    public function removeItem($id)
     {
-
+        $item = Order::find($id);
+        if ($item) {
+            $item->orderItems()->delete(); // Xóa các mục liên quan trước
+            $item->delete();
+            $this->dispatch('notify', type: 'success', message: 'Đã xóa đơn hàng');
+            $this->applyFilters(); // Cập nhật lại danh sách sau khi xóa
+        } else {
+            $this->dispatch('notify', type: 'error', message: 'Không tìm thấy đơn hàng');
+        }
     }
 }

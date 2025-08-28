@@ -108,14 +108,16 @@
                 wire:click="tempOrder({{ $orders->id }})" {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Lưu tạm thời
             </button> --}}
-            {{$orders}}
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10 {{$orders->status != \App\Models\Order::STATUS_TEMPOLARY ? 'd-none' : ''}}" wire:click="tempOrder({{ $orderId }})"
-                {{ isset($orders->id) ? '' : 'disabled' }}>
+            {{-- {{ $orders }} --}}
+            <button
+                class="btn btn-success w-150 mt-3 py-2 fs-10 {{ $orders->status == \App\Models\Order::STATUS_TEMPOLARY || $orders->status == \App\Models\Order::STATUS_SUCCESS ? 'd-none' : '' }}"
+                wire:click="tempOrder({{ $orderId }})" {{ isset($orders->id) ? '' : 'disabled' }}>
                 <i class="fas fa-print me-2"></i> Lưu tạm thời
             </button>
-            <button class="btn btn-success w-150 mt-3 py-2 fs-10 {{$orders->status != \App\Models\Order::STATUS_SUCCESS ? '' : 'd-none'}}" wire:click="paymentSuccess({{ $orderId }})"
-                {{ isset($orders->id) ? '' : 'disabled' }}>
-                <i class="fas fa-print me-2"></i> Đã thanh toán
+            <button
+                class="btn btn-success w-150 mt-3 py-2 fs-10 {{ $orders->status == \App\Models\Order::STATUS_SUCCESS ? 'd-none' : '' }}"
+                wire:click="paymentSuccess({{ $orderId }})" {{ isset($orders->id) ? '' : 'disabled' }}>
+                <i class="fas fa-print me-2"></i> Thanh toán
             </button>
             <button class="btn btn-success w-150 mt-3 py-2 fs-10" wire:click="printInvoice({{ $orderId }})"
                 {{ isset($orders->id) ? '' : 'disabled' }}>
