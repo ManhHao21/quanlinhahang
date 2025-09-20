@@ -9,7 +9,8 @@
         <div class="d-flex gap-2">
             <a href="{{ route('create') }}" class="btn btn-primary">Thêm món</a>
             <a href="/order-history" class="btn btn-primary">Lịch sử</a>
-            <a class="btn btn-primary">Cấu hình</a>
+            <a href="{{ route('ingredients.create') }}" class="btn btn-primary">thêm nguyên liệu</a>
+            <a href="{{ route('ingredients.history') }}" class="btn btn-primary">Lịch sử nguyên liệu</a>
         </div>
     </div>
 </div>

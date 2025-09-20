@@ -40,3 +40,13 @@ Route::get('/orders/{id}', function($id) {
     }
     return view('show', compact('id', 'order'));
 })->name('orders.show');
+
+
+
+Route::get('/ingredients/create', function () {
+    return view('create');
+})->name('ingredients.create');
+
+Route::get('/ingredients/history', function () {
+    return view('ingredient-purchase-history');
+})->name('ingredients.history');
